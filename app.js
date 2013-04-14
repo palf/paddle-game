@@ -11,7 +11,7 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 
 if ('development' == app.get('env')) {
-  app.use(express.logger('dev'));
+  // app.use(express.logger('dev'));
 }
 // app.use(express.bodyParser());
 // app.use(express.methodOverride());
@@ -43,14 +43,11 @@ io_server.configure(function () {
 
 
 
-http_server.listen(port, function() {
-  console.log("Listening on port " + port);
-});
+http_server.listen(port, function() { } );
 
 io_server.sockets.on('connection', function (socket) {
-  console.log('socket io running')
-  socket.on('on hammer', function (data) {
-    console.log('recieved hammer');
-    socket.broadcast.emit('hammer data', data);
+  socket.on('on paddle', function (data) {
+    console.log('recieved data', data);
+    // socket.broadcast.emit('hammer data', data);
   });
 });
