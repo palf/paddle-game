@@ -5,91 +5,121 @@ window.requestAnimFrame = (function(){
 })();
 
 
-var power_value = 40;
-var angle_value = 30;
-var bullet_value = true;
+document.addEventListener("DOMContentLoaded", function() {
+  init();
+
+  (function loop(animStart) {
+    update(animStart);
+    draw();
+    requestAnimFrame(loop);
+  })();
+}, false);
+
 
 var SCALE = 10;
 var NULL_CENTER = {x:null, y:null};
 
-var world = {};
-var bodiesState = null;
-var box = null;
+var bodyDefinitions = {};
+var gameWorld = null;
 
 var ctx = document.getElementById("world").getContext("2d");
 var canvasWidth = ctx.canvas.width;
 var canvasHeight = ctx.canvas.height;
+var canvas = {
+  center : {
+    x : (canvasWidth / 2) / SCALE,
+    y : (canvasHeight / 2) / SCALE
+  }
+}
 
 
-ground = {
-  id: "ground",
-  x: (canvasWidth/2) / SCALE,
-  y: canvasHeight / SCALE,
-  halfHeight: 0.5,
-  halfWidth: (canvasWidth/2) / SCALE,
+var left_paddle = {
+  id: "left_paddle",
+  x: (10) / SCALE,
+  y: canvas.center.y,
+  halfWidth: 5 / SCALE,
+  halfHeight: 30 / SCALE,
   color: 'yellow'
 }
 
-left_wall = {
-  id: "left_wall",
-  x: 0,
-  y: (canvasHeight/2) / SCALE,
-  halfHeight: (canvasHeight/2) / SCALE - 0.5,
-  halfWidth: 0.5,
+var right_paddle = {
+  id: "right_paddle",
+  x: (canvasWidth - 10) / SCALE,
+  y: canvas.center.y,
+  halfWidth: 5 / SCALE,
+  halfHeight: 30 / SCALE,
   color: 'yellow'
 }
 
-right_wall = {
-  id: "right_wall",
-  x: canvasWidth / SCALE,
-  y: (canvasHeight/2) / SCALE,
-  halfHeight: (canvasHeight/2) / SCALE - 0.5,
-  halfWidth: 0.5,
-  color: 'yellow'
+var ball = {
+  id: "ball",
+  x: canvas.center.x,
+  y: canvas.center.y,
+  radius: 0.5,
+  color: 'red'
 }
 
-ceiling = {
-  id: "ceiling",
-  x: (canvasWidth/2) / SCALE,
-  y: 0,
-  halfHeight: 0.5,
-  halfWidth: (canvasWidth/2) / SCALE,
-  color: 'yellow'
-}
 
 var initialState = [
-  ground,
-  left_wall,
-  right_wall,
-  ceiling,
-  {id: "b1", x:17, y: canvasHeight / SCALE - 1, halfHeight: 2, halfWidth: 0.10},
-  {id: "b2", x:17, y: canvasHeight / SCALE - 5, halfHeight: 0.25, halfWidth: 2}
+  left_paddle,
+  right_paddle,
+  ball
 ];
-
-var ball_def = {id: "ball", x: 2, y: canvasHeight / SCALE - 2, radius: 0.5}
-
-var running = true;
-var restart = false;
-
-
 
 
 var socket = io.connect();
-socket.on("hammer data", function (data) {
-  angle_value = data['angle']
-  power_value = data['power']
-  restart = true
+socket.on("paddle data", function (data) {
+  // console.log(data);
+  var paddle = data['paddle']
+  var yPosition = data['y_position']
+  paddle = 'left';
+  yPosition = data;
+  movePaddle(paddle, yPosition);
 });
 
 
+function init() {
+  for (var i = 0; i < initialState.length; i++) {
+    var entityDefinition = initialState[i];
+    bodyDefinitions[entityDefinition.id] = Entity.build(entityDefinition);
+  }
+
+  gameWorld = new GameWorld(60, false, canvasWidth, canvasHeight, SCALE);
+  gameWorld.setBodies(bodyDefinitions, true);
+  gameWorld.applyImpulse('ball', 0, 10);
+}
+
+
+function movePaddle(paddle, yPosition) {
+  // console.log(paddle, yPosition);
+  var id = 'left_paddle';
+  var paddle = bodyDefinitions[id];
+
+
+  var body = this.getBodyAt(x, y);
+
+  var md = new b2MouseJointDef();
+  md.target.Set(x, y);
+  md.collideConnected = true;
+  md.maxForce = 300.0 * body.GetMass();
+  this.mouseJoint = this.world.CreateJoint(md);
+  body.SetAwake(true);
+
+
+
+
+  console.log(gameWorld);
+  gameWorld.applyImpulse(id, -90, 10);
+
+};
 
 
 function update(animStart) {
-  box.update();
-  bodiesState = box.getState();
+  gameWorld.update();
+  var bodiesState = gameWorld.getState();
 
   for (var id in bodiesState) {
-    var entity = world[id];
+    var entity = bodyDefinitions[id];
     if (entity) entity.update(bodiesState[id]);
   }
 }
@@ -97,45 +127,8 @@ function update(animStart) {
 
 function draw() {
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-  for (var id in world) {
-    var entity = world[id];
+  for (var id in bodyDefinitions) {
+    var entity = bodyDefinitions[id];
     entity.draw(ctx);
   }
 }
-
-
-function init() {
-  for (var i = 0; i < initialState.length; i++) {
-    world[initialState[i].id] = Entity.build(initialState[i]);
-  }
-
-  add_ball()
-}
-
-var id = 0;
-
-function add_ball() {
-  new_id = 'ball' + id.toString();
-  ball_def['id'] = new_id
-  world[new_id] = Entity.build(ball_def);
-  box = new bTest(60, false, canvasWidth, canvasHeight, SCALE);
-  box.setBodies(world, bullet_value);
-  box.applyImpulse(new_id, angle_value, power_value);
-  id += 1
-}
-
-
-document.addEventListener("DOMContentLoaded", function() {
-  init();
-
-  (function loop(animStart) {
-    if (restart) {
-      // init();
-      add_ball();
-      restart = false;
-    }
-    update(animStart);
-    draw();
-    requestAnimFrame(loop);
-  })();
-}, false);

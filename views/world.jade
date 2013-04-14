@@ -3,8 +3,11 @@ extends layout
 block styles
   link(rel='stylesheet', href='/stylesheets/world.css')
   script(src="/javascripts/third_party/socket.io.js")
+  script(src="/javascripts/third_party/Box2D.js")
 
 block content
   canvas#world(width=600, height=360)
-  script(src='/javascripts/paddle_world.js')
+  script(src='/javascripts/world_objects.js')
+  script(src='/javascripts/world_physics.js')
+  script(src='/javascripts/world_setup.js')
 

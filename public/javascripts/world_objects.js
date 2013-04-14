@@ -30,22 +30,24 @@ Entity.prototype.draw = function(ctx) {
 
 Entity.build = function(def) {
   if (def.radius) {
-  return new CircleEntity(def.id, def.x, def.y, def.angle, NULL_CENTER, def.color, def.radius);
+    return new CircleEntity(def.id, def.x, def.y, def.angle, NULL_CENTER, def.color, def.radius);
   } else if (def.polys) {
-  return new PolygonEntity(def.id, def.x, def.y, def.angle, NULL_CENTER, def.color, def.polys);
+    return new PolygonEntity(def.id, def.x, def.y, def.angle, NULL_CENTER, def.color, def.polys);
   } else {
-  return new RectangleEntity(def.id, def.x, def.y, def.angle, NULL_CENTER, def.color, def.halfWidth, def.halfHeight);
+    return new RectangleEntity(def.id, def.x, def.y, def.angle, NULL_CENTER, def.color, def.halfWidth, def.halfHeight);
   }
 }
+
+
 
 function CircleEntity(id, x, y, angle, center, color, radius) {
   color = color || 'aqua';
   Entity.call(this, id, x, y, angle, center, color);
   this.radius = radius;
 }
+
 CircleEntity.prototype = new Entity();
 CircleEntity.prototype.constructor = CircleEntity;
-
 CircleEntity.prototype.draw = function(ctx) {
   ctx.save();
   ctx.translate(this.x * SCALE, this.y * SCALE);
@@ -61,20 +63,21 @@ CircleEntity.prototype.draw = function(ctx) {
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
-
   ctx.restore();
 
   Entity.prototype.draw.call(this, ctx);
 }
+
+
 
 function RectangleEntity(id, x, y, angle, center, color, halfWidth, halfHeight) {
   Entity.call(this, id, x, y, angle, center, color);
   this.halfWidth = halfWidth;
   this.halfHeight = halfHeight;
 }
+
 RectangleEntity.prototype = new Entity();
 RectangleEntity.prototype.constructor = RectangleEntity;
-
 RectangleEntity.prototype.draw = function(ctx) {
   ctx.save();
   ctx.translate(this.x * SCALE, this.y * SCALE);
@@ -90,13 +93,15 @@ RectangleEntity.prototype.draw = function(ctx) {
   Entity.prototype.draw.call(this, ctx);
 }
 
+
+
 function PolygonEntity(id, x, y, angle, center, color, polys) {
   Entity.call(this, id, x, y, angle, center, color);
   this.polys = polys;
 }
+
 PolygonEntity.prototype = new Entity();
 PolygonEntity.prototype.constructor = PolygonEntity;
-
 PolygonEntity.prototype.draw = function(ctx) {
   ctx.save();
   ctx.translate(this.x * SCALE, this.y * SCALE);

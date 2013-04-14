@@ -46,8 +46,8 @@ io_server.configure(function () {
 http_server.listen(port, function() { } );
 
 io_server.sockets.on('connection', function (socket) {
-  socket.on('on paddle', function (data) {
+  socket.on('on paddle input', function (data) {
     console.log('recieved data', data);
-    // socket.broadcast.emit('hammer data', data);
+    socket.broadcast.emit('paddle data', data);
   });
 });

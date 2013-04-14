@@ -11,7 +11,7 @@ var   b2Vec2 = Box2D.Common.Math.b2Vec2
  , b2RevoluteJointDef = Box2D.Dynamics.Joints.b2RevoluteJointDef
    ;
 
-function bTest(intervalRate, adaptive, width, height, scale) {
+function GameWorld(intervalRate, adaptive, width, height, scale) {
   this.intervalRate = parseInt(intervalRate);
   this.adaptive = adaptive;
   this.width = width;
@@ -21,8 +21,8 @@ function bTest(intervalRate, adaptive, width, height, scale) {
   this.bodiesMap = {};
 
   this.world = new b2World(
-        new b2Vec2(0, 10)    //gravity
-     ,  true                 //allow sleep
+        new b2Vec2(0, 0)    // no gravity
+     ,  true                 // allow sleep
   );
 
   this.fixDef = new b2FixtureDef;
@@ -31,7 +31,7 @@ function bTest(intervalRate, adaptive, width, height, scale) {
   this.fixDef.restitution = 0.2;
 }
 
-bTest.prototype.update = function() {
+GameWorld.prototype.update = function() {
   var start = Date.now();
   var stepRate = (this.adaptive) ? (now - this.lastTimestamp) / 1000 : (1 / this.intervalRate);
   this.world.Step(
@@ -43,7 +43,7 @@ bTest.prototype.update = function() {
    return (Date.now() - start);
 }
 
-bTest.prototype.getState = function() {
+GameWorld.prototype.getState = function() {
   var state = {};
   for (var b = this.world.GetBodyList(); b; b = b.m_next) {
     if (b.IsActive() && typeof b.GetUserData() !== 'undefined' && b.GetUserData() != null) {
@@ -53,11 +53,11 @@ bTest.prototype.getState = function() {
   return state;
 }
 
-bTest.prototype.getBodySpec = function(b) {
+GameWorld.prototype.getBodySpec = function(b) {
     return {x: b.GetPosition().x, y: b.GetPosition().y, a: b.GetAngle(), c: {x: b.GetWorldCenter().x, y: b.GetWorldCenter().y}};
 }
 
-bTest.prototype.setBodies = function(bodyEntities, enableBullet) {
+GameWorld.prototype.setBodies = function(bodyEntities, enableBullet) {
     var bodyDef = new b2BodyDef;
 
     for(var id in bodyEntities) {
@@ -101,13 +101,13 @@ bTest.prototype.setBodies = function(bodyEntities, enableBullet) {
     this.ready = true;
 }
 
-bTest.prototype.registerBody = function(bodyDef) {
+GameWorld.prototype.registerBody = function(bodyDef) {
     var body = this.world.CreateBody(bodyDef);
     this.bodiesMap[body.GetUserData()] = body;
     return body;
 }
 
-bTest.prototype.addRevoluteJoint = function(body1Id, body2Id, params) {
+GameWorld.prototype.addRevoluteJoint = function(body1Id, body2Id, params) {
     var body1 = this.bodiesMap[body1Id];
     var body2 = this.bodiesMap[body2Id];
     var joint = new b2RevoluteJointDef();
@@ -120,7 +120,7 @@ bTest.prototype.addRevoluteJoint = function(body1Id, body2Id, params) {
     this.world.CreateJoint(joint);
 }
 
-bTest.prototype.applyImpulse = function(bodyId, degrees, power) {
+GameWorld.prototype.applyImpulse = function(bodyId, degrees, power) {
     var body = this.bodiesMap[bodyId];
     body.ApplyImpulse(new b2Vec2(Math.cos(degrees * (Math.PI / 180)) * power,
                                  Math.sin(degrees * (Math.PI / 180)) * power),
