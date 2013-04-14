@@ -1,6 +1,6 @@
 {
-  "name": "palf-cannon",
-  "description": "a dual screen game",
+  "name": "palf-paddle",
+  "description": "a dual screen game, remniscent of Pong",
   "author": "Jack Palfrey <jack.palf@gmail.com>",
   "version": "0.0.1",
   "private": true,
