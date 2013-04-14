@@ -4,7 +4,8 @@ exports.index = function(req, res){
 
 
 exports.remote = function(req, res){
-  res.render('remote', { title: 'Palf Paddle :: Remote' });
+  var paddle = req.query['paddle'];
+    res.render('remote', { title: 'Palf Paddle :: Remote (' + paddle + ')' , paddle: paddle});
 };
 
 
